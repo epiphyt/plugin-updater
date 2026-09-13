@@ -28,7 +28,15 @@ use epiphyt\Plugin_Updater\Strings;
 \define( 'FAKE_PLUGIN_LICENSE_URL', '__LICENSE_URL__' );
 
 /**
- * Autoload the updater package the same way the real plugins do.
+ * Autoload the updater package.
+ *
+ * The real plugins use Composer's classmap for this. The harness stages the
+ * package by copying inc/ rather than by running Composer, so the file naming
+ * convention is resolved by hand here: Foo lives in class-foo.php, Foo_Interface
+ * in interface-foo.php.
+ *
+ * An unresolvable class in this namespace is always a harness bug, so it fails
+ * loudly instead of leaving PHP to report a missing type somewhere else.
  */
 \spl_autoload_register( static function ( string $class_name ): void {
 	$prefix = 'epiphyt\\Plugin_Updater\\';
@@ -37,13 +45,29 @@ use epiphyt\Plugin_Updater\Strings;
 		return;
 	}
 
-	$name = \substr( $class_name, \strlen( $prefix ) );
-	$file = __DIR__ . '/vendor/epiphyt/wp-plugin-updater/inc/class-'
-		. \str_replace( '_', '-', \strtolower( $name ) ) . '.php';
+	$directory = __DIR__ . '/vendor/epiphyt/wp-plugin-updater/inc/';
+	$name = \str_replace( '_', '-', \strtolower( \substr( $class_name, \strlen( $prefix ) ) ) );
+	$candidates = [ $directory . 'class-' . $name . '.php' ];
 
-	if ( \file_exists( $file ) ) {
-		require_once $file;
+	foreach ( [ 'interface', 'trait' ] as $type ) {
+		if ( \str_ends_with( $name, '-' . $type ) ) {
+			$candidates[] = $directory . $type . '-' . \substr( $name, 0, -\strlen( $type ) - 1 ) . '.php';
+		}
 	}
+
+	foreach ( $candidates as $file ) {
+		if ( \file_exists( $file ) ) {
+			require_once $file;
+
+			return;
+		}
+	}
+
+	throw new \RuntimeException( \sprintf(
+		'The end-to-end fixture cannot autoload %1$s. Tried: %2$s.',
+		$class_name,
+		\implode( ', ', $candidates )
+	) );
 } );
 
 /**

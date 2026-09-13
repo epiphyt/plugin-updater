@@ -121,7 +121,7 @@ class Plugin_Updater {
 	 * @param	\epiphyt\Plugin_Updater\Credentials|null	$credentials Credentials, or null to use the stored ones
 	 * @return	true|\WP_Error True on success, an error otherwise
 	 */
-	public function activate_license( ?Credentials $credentials = null ): true|\WP_Error {
+	public function activate_license( ?Credentials $credentials = null ): bool|\WP_Error {
 		return $this->license->activate( $credentials );
 	}
 	
@@ -149,7 +149,7 @@ class Plugin_Updater {
 	 * @param	\epiphyt\Plugin_Updater\Credentials|null	$credentials Credentials, or null to use the stored ones
 	 * @return	true|\WP_Error True on success, an error otherwise
 	 */
-	public function deactivate_license( ?Credentials $credentials = null ): true|\WP_Error {
+	public function deactivate_license( ?Credentials $credentials = null ): bool|\WP_Error {
 		return $this->license->deactivate( $credentials );
 	}
 	

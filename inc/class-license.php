@@ -54,7 +54,7 @@ final class License {
 	 * @param	\epiphyt\Plugin_Updater\Credentials|null	$credentials License credentials, or null to use the stored ones
 	 * @return	true|\WP_Error True on success, an error otherwise
 	 */
-	public function activate( ?Credentials $credentials = null ): true|\WP_Error {
+	public function activate( ?Credentials $credentials = null ): bool|\WP_Error {
 		$credentials ??= $this->get_credentials();
 		
 		if ( $credentials === null || ! $credentials->is_complete() ) {
@@ -192,7 +192,7 @@ final class License {
 	 * @param	\epiphyt\Plugin_Updater\Credentials|null	$credentials License credentials, or null to use the stored ones
 	 * @return	true|\WP_Error True on success, an error otherwise
 	 */
-	public function deactivate( ?Credentials $credentials = null ): true|\WP_Error {
+	public function deactivate( ?Credentials $credentials = null ): bool|\WP_Error {
 		$credentials ??= $this->get_credentials();
 		
 		if ( $credentials === null || ! $credentials->is_complete() ) {

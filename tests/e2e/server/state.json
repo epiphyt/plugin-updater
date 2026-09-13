@@ -1,26 +1,53 @@
 {
-    "activations": [],
+    "activations": {
+        "http:\/\/playground.test\/": {
+            "activation_platform": "http:\/\/playground.test\/",
+            "instance": "http:\/\/playground.test\/",
+            "software_version": "1.1"
+        }
+    },
     "requests": [
         {
             "instance": "http:\/\/playground.test\/",
             "platform": "http:\/\/playground.test\/",
             "product_id": "Fake Plugin",
             "request": "check",
-            "time": 1789239676
+            "time": 1789321869
+        },
+        {
+            "instance": "http:\/\/playground.test\/",
+            "platform": "http:\/\/playground.test\/",
+            "product_id": "Fake Plugin",
+            "request": "activation",
+            "time": 1789321869
         },
         {
             "instance": "http:\/\/playground.test\/",
             "platform": "http:\/\/playground.test\/",
             "product_id": "Fake Plugin",
             "request": "check",
-            "time": 1789239676
+            "time": 1789321869
+        },
+        {
+            "instance": "http:\/\/playground.test\/",
+            "platform": "http:\/\/playground.test\/",
+            "product_id": "Fake Plugin",
+            "request": "check",
+            "time": 1789321869
         },
         {
             "instance": null,
             "platform": "http:\/\/playground.test\/",
             "product_id": "Fake Plugin",
             "request": "get_metadata",
-            "time": 1789239676
+            "time": 1789321869
+        },
+        {
+            "instance": null,
+            "platform": "http:\/\/playground.test\/",
+            "product_id": "Fake Plugin",
+            "request": "download",
+            "time": 1789321870
         }
     ]
 }
