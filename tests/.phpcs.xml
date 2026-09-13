@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<ruleset name="PSR12ForTests">
+	<rule ref="PSR12"/>
+
+	<!--
+		Test doubles implement the interfaces of this package, whose methods are
+		snake_case by house style, so they cannot be camelCase here.
+	-->
+	<rule ref="PSR1.Methods.CamelCapsMethodName">
+		<exclude-pattern>*/doubles/*</exclude-pattern>
+	</rule>
+
+	<exclude-pattern>*/e2e/fixtures/*</exclude-pattern>
+</ruleset>

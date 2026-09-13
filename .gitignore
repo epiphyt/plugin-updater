@@ -1,0 +1,5 @@
+/.phpunit.cache/
+/node_modules/
+/tests/e2e/.work/
+/tests/e2e/server/packages/
+/vendor/

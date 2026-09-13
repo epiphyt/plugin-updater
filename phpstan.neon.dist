@@ -1,0 +1,7 @@
+parameters:
+  level: 9
+  paths:
+    - inc/
+  scanDirectories:
+    - vendor/php-stubs
+  treatPhpDocTypesAsCertain: false

@@ -1,0 +1,26 @@
+{
+    "activations": [],
+    "requests": [
+        {
+            "instance": "http:\/\/playground.test\/",
+            "platform": "http:\/\/playground.test\/",
+            "product_id": "Fake Plugin",
+            "request": "check",
+            "time": 1789239676
+        },
+        {
+            "instance": "http:\/\/playground.test\/",
+            "platform": "http:\/\/playground.test\/",
+            "product_id": "Fake Plugin",
+            "request": "check",
+            "time": 1789239676
+        },
+        {
+            "instance": null,
+            "platform": "http:\/\/playground.test\/",
+            "product_id": "Fake Plugin",
+            "request": "get_metadata",
+            "time": 1789239676
+        }
+    ]
+}
