@@ -103,7 +103,7 @@ final class License {
 		
 		$credentials = $this->get_credentials();
 		
-		return $credentials !== null && $credentials->is_complete();
+		return $credentials !== null && $credentials->is_complete() && $this->is_activated();
 	}
 	
 	/**
