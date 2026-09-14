@@ -118,14 +118,8 @@ final class License {
 		
 		$credentials = $this->get_credentials();
 		
+		// a fresh installation has no credentials yet, so there is nothing to check
 		if ( $credentials === null || ! $credentials->is_complete() ) {
-			$this->store_response( [
-				'activated' => false,
-				'code' => 400,
-				'error' => $this->config->get_string( Strings::MISSING_CREDENTIALS ),
-				'timestamp' => \time(),
-			] );
-			
 			return;
 		}
 		
