@@ -61,7 +61,13 @@ final class Package_Mover {
 			return $source;
 		}
 		
-		$directory = $this->config->get_plugin_slug();
+		$directory = \dirname( $this->config->get_plugin_basename() );
+		
+		// a single-file plugin lives in the plugin directory itself and must not
+		// be wrapped into a directory of its own
+		if ( $directory === '.' || $directory === '' ) {
+			return $source;
+		}
 		
 		// WP_Upgrader derives the destination from basename( $source ), so
 		// renaming the extracted directory is all that is needed
@@ -71,7 +77,11 @@ final class Package_Mover {
 		
 		$new_source = \trailingslashit( $remote_source ) . $directory;
 		
-		if ( ! $wp_filesystem->move( \untrailingslashit( $source ), $new_source ) ) {
+		if ( $wp_filesystem->exists( $new_source ) && ! $wp_filesystem->delete( $new_source, true ) ) {
+			return $source;
+		}
+		
+		if ( ! $this->relocate( $source, $new_source, $remote_source ) ) {
 			return $source;
 		}
 		
@@ -79,6 +89,54 @@ final class Package_Mover {
 		$this->update_checker->invalidate_cache();
 		
 		return \trailingslashit( $new_source );
+	}
+	
+	/**
+	 * Move the extracted files to a new location inside the working directory.
+	 * 
+	 * A ZIP whose files sit at its root has no directory to rename: WP_Upgrader
+	 * then uses the working directory itself as the source, and a directory
+	 * cannot be renamed into one of its own children. In that case the entries
+	 * are moved one by one instead.
+	 * 
+	 * @param	string	$source Current source location
+	 * @param	string	$new_source Target source location
+	 * @param	string	$remote_source Remote source location
+	 * @return	bool Whether the files have been moved
+	 */
+	private function relocate( string $source, string $new_source, string $remote_source ): bool {
+		global $wp_filesystem;
+		
+		if ( ! $wp_filesystem instanceof \WP_Filesystem_Base ) {
+			return false;
+		}
+		
+		if ( \untrailingslashit( $source ) !== \untrailingslashit( $remote_source ) ) {
+			return $wp_filesystem->move( \untrailingslashit( $source ), $new_source );
+		}
+		
+		$entries = $wp_filesystem->dirlist( $source );
+		
+		if ( ! \is_array( $entries ) || $entries === [] ) {
+			return false;
+		}
+		
+		if ( ! $wp_filesystem->mkdir( $new_source ) ) {
+			return false;
+		}
+		
+		foreach ( \array_keys( $entries ) as $entry ) {
+			$moved = $wp_filesystem->move(
+				\trailingslashit( $source ) . $entry,
+				\trailingslashit( $new_source ) . $entry
+			);
+			
+			if ( ! $moved ) {
+				return false;
+			}
+		}
+		
+		return true;
 	}
 	
 	/**

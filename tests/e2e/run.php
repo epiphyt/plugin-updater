@@ -105,15 +105,19 @@ function build_plugin(string $root, string $e2e, string $work, string $version, 
 
 /**
  * Zip a directory, placing its contents under a single inner folder.
+ *
+ * An empty inner folder name produces a flat archive carrying the plugin files
+ * at its root, which is what some update servers deliver.
  */
 function build_zip(string $work, string $pluginDir, string $inner, string $version, string $zipPath): void
 {
-    $staging = $work . '/zip-' . $inner;
+    $staging = $work . '/zip-' . ($inner !== '' ? $inner : 'flat');
+    $target = $inner !== '' ? $staging . '/' . $inner : $staging;
 
     rmdir_recursive($staging);
-    copy_recursive($pluginDir, $staging . '/' . $inner);
+    copy_recursive($pluginDir, $target);
 
-    $file = $staging . '/' . $inner . '/fake-plugin.php';
+    $file = $target . '/fake-plugin.php';
     $contents = (string) file_get_contents($file);
     $contents = preg_replace('/^ \* Version: .*$/m', ' * Version: ' . $version, $contents);
 
@@ -188,11 +192,15 @@ foreach ($matrices as $current) {
     build_zip($work, $pluginDir, 'fake-plugin', '1.0.0', $initialZip);
 
     // the directory inside the update ZIP deliberately does not match the
-    // plugin slug, which is what the real update server produces
+    // plugin slug, which is what the real update server produces; the
+    // 'flat-package' scenario drops that directory entirely, which used to leave
+    // WordPress with nothing to rename and installed the plugin a second time
     build_zip(
         $work,
         $pluginDir,
-        'fake-plugin-' . OFFERED_VERSION . '-' . bin2hex(random_bytes(4)),
+        $scenario === 'flat-package'
+            ? ''
+            : 'fake-plugin-' . OFFERED_VERSION . '-' . bin2hex(random_bytes(4)),
         OFFERED_VERSION,
         $packageDir . '/fake-plugin.zip'
     );
@@ -322,7 +330,8 @@ foreach ($matrices as $current) {
         say('  FAIL  ' . $error);
     }
 
-    if ($scenario !== 'valid') {
+    // a flat package has to end up exactly where a regular one does
+    if ($scenario !== 'valid' && $scenario !== 'flat-package') {
         say('  (scenario assertions)');
         check($failures, $current . ': no update installed', ($steps['version_after'] ?? null) === '1.0.0');
 

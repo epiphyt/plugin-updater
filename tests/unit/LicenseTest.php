@@ -3,7 +3,13 @@ declare(strict_types=1);
 
 namespace epiphyt\Plugin_Updater\Tests\Unit;
 
+use Brain\Monkey;
+use Brain\Monkey\Functions;
+use epiphyt\Plugin_Updater\Config;
 use epiphyt\Plugin_Updater\License;
+use epiphyt\Plugin_Updater\Storage;
+use epiphyt\Plugin_Updater\Tests\Doubles\FakeLicenseClient;
+use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
@@ -11,6 +17,52 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(License::class)]
 final class LicenseTest extends TestCase
 {
+    use MockeryPHPUnitIntegration;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Monkey\setUp();
+        FakeLicenseClient::$calls = [];
+    }
+
+    protected function tearDown(): void
+    {
+        Monkey\tearDown();
+        parent::tearDown();
+    }
+
+    private function makeLicense(): License
+    {
+        $config = new Config(
+            plugin_basename: 'my-plugin/my-plugin.php',
+            plugin_key: 'my_plugin',
+            product_id: 'My Plugin',
+            update_slug: 'my-plugin',
+            license_option_name: 'my_plugin_license_options',
+            license_client: FakeLicenseClient::class
+        );
+
+        return new License($config, new Storage($config), $config->create_license_client());
+    }
+
+    /**
+     * A fresh installation has no credentials yet. Writing a failure response
+     * here made every newly installed plugin report a failed license activation
+     * on the very next request, before anything could have been entered.
+     */
+    public function testCheckWithoutCredentialsStoresNothing(): void
+    {
+        Functions\when('is_multisite')->justReturn(false);
+        Functions\when('get_option')->justReturn(false);
+        Functions\expect('update_option')->never();
+        Functions\expect('delete_option')->never();
+
+        $this->makeLicense()->check();
+
+        self::assertSame([], array_slice(FakeLicenseClient::$calls, 1));
+    }
+
     /**
      * An absent response means nothing has been attempted yet, which is not a
      * failure. The original implementation agreed here – but its callers then

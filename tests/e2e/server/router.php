@@ -204,7 +204,10 @@ if ($action === 'download') {
     }
 
     header('Content-Type: application/zip');
-    header('Content-Disposition: attachment; filename="fake-plugin.zip"');
+    // the package is named after the update slug, never after the directory the
+    // plugin is installed in – WordPress derives its working directory from this
+    // name, so the two must be allowed to differ
+    header('Content-Disposition: attachment; filename="fake-plugin-dev.zip"');
     header('Content-Length: ' . filesize($zip));
     readfile($zip);
     exit;
